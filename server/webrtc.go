@@ -6,6 +6,7 @@ package server
 #include <shadow.h>
 #include <stddef.h>
 #include <stdlib.h>
+// MT: This should be after the comment
 import "C"
 */
 
@@ -87,6 +88,7 @@ func (peer *Peer) OnChannelReq(d *webrtc.DataChannel) {
 		return
 	}
 
+	// MT: This code is "dense", need to move to smaller functions
 	d.OnOpen(func() {
 		var err error
 		l := d.Label()
@@ -111,6 +113,7 @@ func (peer *Peer) OnChannelReq(d *webrtc.DataChannel) {
 			log.Printf("< %v", p)
 			l, err := cmd.Tty.Write(p)
 			if err != nil {
+				// MT: Don't panic
 				log.Panicf("Stdin Write returned an error: %v", err)
 			}
 			if l != len(p) {
@@ -133,6 +136,13 @@ func (peer *Peer) OnChannelReq(d *webrtc.DataChannel) {
 // to command 123
 func (server *WebRTCServer) PipeCommand(c string, d *webrtc.DataChannel,
 	username string) (*Command, error) {
+	/* MT: You can group vars in () as in
+	var (
+		cmd *exec.Cmd
+		tty *os.File
+		...
+	)
+	*/
 	var cmd *exec.Cmd
 	var tty *os.File
 	var err error
@@ -205,6 +215,8 @@ func (server *WebRTCServer) PipeCommand(c string, d *webrtc.DataChannel,
 
 func (cmd *Command) ReadLoop() {
 	var i int
+	// MT: io.Copy & https://golang.org/pkg/io/#MultiWriter
+	// You can use SIGCHILD to know if a child process died
 	b := make([]byte, 4096)
 	for cmd.C.ProcessState.String() != "killed" {
 		l, err := cmd.Tty.Read(b)

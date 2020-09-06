@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# MT: Make this a go file with a "// +build ignore" comment. People who'll
+# work with it won't need Python
+
 import subprocess
 
 if __name__ == "__main__":

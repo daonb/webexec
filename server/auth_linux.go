@@ -1,4 +1,6 @@
 // +build linux
+// MT: Apart from build tags, you can use file names
+// see https://dave.cheney.net/2013/10/12/how-to-use-conditional-compilation-with-the-go-build-tool
 
 package server
 
@@ -25,12 +27,14 @@ func Authenticate(args *AuthArgs) string {
 	var c crypt.Crypter
 	var err error
 
+	// MT: Memory leak, need to free the output of C.CString
 	sp := C.getspnam(C.CString(args.Username))
 	if sp == nil {
 		log.Printf("Failed to get user details >\nIf this happens for valid user, maybe we're not running as root")
 		return ""
 	}
 	pwdp := C.GoString(sp.sp_pwdp)
+	// MT: Document this, maybe input example
 	i := 0
 	salt := strings.IndexFunc(pwdp, func(r rune) bool {
 		if r == '$' {
@@ -41,6 +45,7 @@ func Authenticate(args *AuthArgs) string {
 	s := []byte(pwdp)[:salt]
 	t := string(pwdp)[salt:]
 	if t == args.Secret {
+		// MT: return t ?
 		goto HappyEnd
 	}
 	c = sha512_crypt.New()

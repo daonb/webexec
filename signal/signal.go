@@ -20,6 +20,7 @@ const compress = false
 
 // MustReadStdin blocks until input is received from stdin
 func MustReadStdin() string {
+	// MT: Use bufio.Scanner
 	r := bufio.NewReader(os.Stdin)
 
 	var in string
@@ -45,8 +46,24 @@ func MustReadStdin() string {
 // Encode encodes the input in base64
 // It can optionally zip the input before encoding
 func Encode(obj interface{}) string {
+	/* MT: You can use io.Reader/io.Writer for composition
+
+	var buf bytes.Buffer
+	var w io.Writer = buf
+	if compress {
+		w = gzip.NewWriter(buf)
+	}
+	w = base64.NewEncoder(base64.StdEncoding, w)
+	if err := json.NewEncoder(w).Encode(obj); err != nil {
+		return err
+	}
+	return buf.String()
+
+	*/
+
 	b, err := json.Marshal(obj)
 	if err != nil {
+		// MT: Don't panic
 		panic(err)
 	}
 

@@ -1,11 +1,9 @@
 # webexec
 
+⚠️ NO Authentication is this branch yet ⚠️
 
 webexec is a server daemon that acts as a webrtc peer to executs commands
 and pipes their i/o over webrtc's data channels.
-
-IMPORTANT: Webexec is still not ready for darwin. It runs on the platform but
-authenticates everyone. 
 
 ## flow
 

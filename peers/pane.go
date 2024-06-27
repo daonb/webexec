@@ -275,6 +275,13 @@ func (pane *Pane) Kill() {
 func (pane *Pane) OnMessage(msg webrtc.DataChannelMessage) {
 	logger := pane.peer.logger
 	p := msg.Data
+	// wait for the TTY to have been created
+	for i := 0; i < 10; i++ {
+		if pane.TTY != nil {
+			break
+		}
+		time.Sleep(time.Second / 10)
+	}
 	l, err := pane.TTY.Write(p)
 	if err == os.ErrClosed {
 		logger.Infof("got an os.ErrClosed")
